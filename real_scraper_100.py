@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Real Zillow scraper to get 100 actual listings with proper pagination
+Zillow scraper get 100 listings with pagination that's basically broken right now
 """
 
 import os
