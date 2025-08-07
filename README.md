@@ -85,7 +85,7 @@ If you prefer not to use Jupyter, you can run the standalone Python scripts:
 python generate_wordcloud.py
 
 # Run the main scraper (if you have data to scrape)
-python real_scraper_100.py
+python scraper.py
 ```
 
 ## Project Structure
