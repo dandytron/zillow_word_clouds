@@ -85,7 +85,7 @@ If you prefer not to use Jupyter, you can run the standalone Python scripts:
 python generate_wordcloud.py
 
 # Run the main scraper (if you have data to scrape)
-python real_scraper_100.py
+python scraper.py
 ```
 
 ## Project Structure
@@ -93,12 +93,11 @@ python real_scraper_100.py
 ```
 zillow_word_clouds/
 ├── data/                           # Generated data and word cloud images
-├── making_clouds.ipynb             # Main Jupyter notebook for word cloud generation
-├── making_clouds_2.ipynb           # Enhanced notebook with cohesive colors
+├── making_clouds.ipynb             # Main Jupyter notebook for reproducible word cloud generation
 ├── playwright_gathering.ipynb      # Web scraping notebook
 ├── generate_wordcloud.py          # Standalone word cloud generator script
-├── real_scraper_100.py            # Main scraping script
-├── index.html.html                # Scrollytelling webpage (rename to index.html)
+├── scraper.py                     # Main scraping script
+├── index.html                      # Scrollytelling webpage 
 ├── requirements.txt               # Python dependencies
 └── README.md                      # This file
 ```
