@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Los Angeles Neighborhood Word Clouds</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Georgia', serif;
+        background-color: #f8fafc;
+        line-height: 1.6;
+        color: #334155;
+      }
+
+      /* Header Section */
+      .header {
+        text-align: center;
+        padding: 3rem 2rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 300;
+        color: #1e293b;
+        margin-bottom: 1rem;
+      }
+
+      .header p {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: clamp(1rem, 2.5vw, 1.25rem);
+        color: #64748b;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      /* Beverly Hills Scrollytelling Section */
+      .beverly-hills-section {
+        position: relative;
+        height: 200vh; /* Double height for scrolling */
+      }
+
+      .beverly-hills-background {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 100vh;
+        background-image: url('data/Beverly_Hills_description_wordcloud.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .beverly-hills-background:hover {
+        transform: scale(1.02);
+      }
+
+      .beverly-hills-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+        transition: background 0.6s ease;
+      }
+
+      .beverly-hills-overlay.fade-overlay {
+        background: rgba(0, 0, 0, 0);
+      }
+
+      /* Magnifying glass for Beverly Hills */
+      .beverly-hills-magnifier {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        z-index: 3;
+        transition: all 0.3s ease;
+        opacity: 0;
+      }
+
+      .beverly-hills-magnifier.visible {
+        opacity: 1;
+      }
+
+      .beverly-hills-background:hover .beverly-hills-magnifier {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+      }
+
+      .floating-text-box {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 16px;
+        padding: 2.5rem;
+        max-width: 600px;
+        margin: 0 2rem;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        transform: translateY(0);
+        transition: all 0.6s ease;
+        z-index: 2;
+      }
+
+      .floating-text-box.fade-out {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+
+      .floating-text-box h2 {
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        margin-bottom: 0.5rem;
+        color: #1e293b;
+        font-weight: 400;
+      }
+
+      .floating-text-box h3 {
+        font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+        color: #64748b;
+        font-style: italic;
+        margin-bottom: 1.5rem;
+        font-weight: 300;
+      }
+
+      .floating-text-box p {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        color: #475569;
+        line-height: 1.7;
+      }
+
+      /* Sequential Gallery Section */
+      .sequential-gallery {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 600vh; /* More space for smooth scroll animations */
+        position: relative;
+        padding: 4rem 0;
+      }
+
+      .gallery-container {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .gallery-title {
+        position: absolute;
+        top: 4rem;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        font-weight: 300;
+        text-align: center;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+      }
+
+      .gallery-title.visible {
+        opacity: 1;
+      }
+
+      .wordcloud-grid {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 2.5rem;
+        max-width: 1500px;
+        width: 100%;
+        padding: 0 2rem;
+      }
+
+      .wordcloud-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: translateY(100vh);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .neighborhood-label {
+        color: white;
+        font-size: 1.4rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      .neighborhood-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1rem;
+        font-style: italic;
+        margin-top: 0.3rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+
+      .wordcloud-card {
+        width: 320px;
+        height: 240px;
+        border-radius: 16px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        position: relative;
+      }
+
+      .wordcloud-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+      }
+
+      .wordcloud-preview {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position: relative;
+      }
+
+      .magnifying-glass {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      .wordcloud-card:hover .magnifying-glass {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+      }
+
+
+
+      /* Conclusion Section */
+      .conclusion {
+        text-align: center;
+        max-width: 900px;
+        margin: 4rem auto;
+        padding: 3rem 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      }
+
+      .conclusion h2 {
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        margin-bottom: 2rem;
+        color: #1e293b;
+        font-weight: 400;
+      }
+
+      .conclusion p {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        color: #475569;
+        margin-bottom: 1.5rem;
+        line-height: 1.7;
+      }
+
+      /* Mobile Responsive */
+      @media (max-width: 768px) {
+        .floating-text-box {
+          padding: 2rem;
+          margin: 0 1rem;
+        }
+
+        .wordcloud-grid {
+          flex-direction: column;
+          gap: 3rem;
+          align-items: center;
+        }
+
+        .wordcloud-item {
+          flex-direction: row;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .neighborhood-label {
+          margin-bottom: 0;
+          margin-right: 1rem;
+          text-align: left;
+          min-width: 120px;
+        }
+
+        .wordcloud-card {
+          width: 240px;
+          height: 180px;
+        }
+
+        .sequential-gallery {
+          min-height: 700vh;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .wordcloud-card {
+          width: 220px;
+          height: 160px;
+        }
+
+        .neighborhood-label {
+          font-size: 1.2rem;
+          min-width: 100px;
+        }
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <!-- Header Section -->
+    <header class="header">
+      <h1>Los Angeles Neighborhood Word Clouds</h1>
+      <p>Explore the language used in rental listings across different Los Angeles neighborhoods. Each word cloud reveals the most distinctive terms used to describe properties in these areas, offering insights into the socioeconomic and cultural differences between neighborhoods.</p>
+    </header>
+
+    <!-- Beverly Hills Scrollytelling Section -->
+    <section class="beverly-hills-section">
+      <div class="beverly-hills-background" id="beverly-hills-bg">
+        <div class="beverly-hills-overlay" id="beverly-hills-overlay">
+          <div class="floating-text-box" id="floating-text">
+            <h2>Beverly Hills</h2>
+            <h3>Luxury & Exclusivity</h3>
+            <p>Beverly Hills rental listings emphasize luxury amenities and exclusive features. Words like "premium," "exclusive," and "luxury" dominate the descriptions, reflecting the high-end nature of this iconic neighborhood.</p>
+          </div>
+        </div>
+        <div class="beverly-hills-magnifier" id="beverly-hills-magnifier">🔍</div>
+      </div>
+    </section>
+
+    <!-- Sequential Gallery Section -->
+    <section class="sequential-gallery">
+      <div class="gallery-container">
+        <h2 class="gallery-title" id="gallery-title">Explore Other Neighborhoods</h2>
+        
+        <div class="wordcloud-grid">
+          <!-- Koreatown -->
+          <div class="wordcloud-item" id="item-koreatown">
+            <div class="neighborhood-label" id="label-koreatown">
+              Koreatown
+              <div class="neighborhood-subtitle">Urban Convenience</div>
+            </div>
+            <div class="wordcloud-card" data-neighborhood="Koreatown">
+              <div class="wordcloud-preview" style="background-image: url('data/Koreatown_description_wordcloud.png');">
+                <div class="magnifying-glass">🔍</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Echo Park -->
+          <div class="wordcloud-item" id="item-echo-park">
+            <div class="neighborhood-label" id="label-echo-park">
+              Echo Park
+              <div class="neighborhood-subtitle">Creative & Vibrant</div>
+            </div>
+            <div class="wordcloud-card" data-neighborhood="Echo_Park">
+              <div class="wordcloud-preview" style="background-image: url('data/Echo_Park_description_wordcloud.png');">
+                <div class="magnifying-glass">🔍</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pacoima -->
+          <div class="wordcloud-item" id="item-pacoima">
+            <div class="neighborhood-label" id="label-pacoima">
+              Pacoima
+              <div class="neighborhood-subtitle">Family & Community</div>
+            </div>
+            <div class="wordcloud-card" data-neighborhood="Pacoima">
+              <div class="wordcloud-preview" style="background-image: url('data/Pacoima_description_wordcloud.png');">
+                <div class="magnifying-glass">🔍</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Watts -->
+          <div class="wordcloud-item" id="item-watts">
+            <div class="neighborhood-label" id="label-watts">
+              Watts
+              <div class="neighborhood-subtitle">Affordability & Opportunity</div>
+            </div>
+            <div class="wordcloud-card" data-neighborhood="Watts">
+              <div class="wordcloud-preview" style="background-image: url('data/Watts_description_wordcloud.png');">
+                <div class="magnifying-glass">🔍</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </section>
+
+    <!-- Conclusion Section -->
+    <section class="conclusion">
+      <h2>What the Word Clouds Reveal</h2>
+      <p>These word clouds show more than just property descriptions—they reveal the socioeconomic narratives of each neighborhood. From Beverly Hills' emphasis on luxury to Watts' focus on affordability, the language used in rental listings reflects the character, priorities, and economic realities of each area.</p>
+      <p>The differences in vocabulary suggest varying target demographics, property values, and neighborhood identities across Los Angeles.</p>
+    </section>
+
+    <script>
+      // Smooth scroll-based animations
+      document.addEventListener('DOMContentLoaded', function() {
+        
+        // Get gallery section info
+        const gallerySection = document.querySelector('.sequential-gallery');
+        const galleryContainer = document.querySelector('.gallery-container');
+        
+        // Get all elements to animate
+        const galleryTitle = document.getElementById('gallery-title');
+        const items = [
+          { element: document.getElementById('item-koreatown'), label: document.getElementById('label-koreatown') },
+          { element: document.getElementById('item-echo-park'), label: document.getElementById('label-echo-park') },
+          { element: document.getElementById('item-pacoima'), label: document.getElementById('label-pacoima') },
+          { element: document.getElementById('item-watts'), label: document.getElementById('label-watts') }
+        ];
+
+        // Scroll-based animation handler
+        function updateGalleryAnimations() {
+          const scrollY = window.scrollY;
+          const windowHeight = window.innerHeight;
+          
+          // Get gallery section bounds
+          const galleryRect = gallerySection.getBoundingClientRect();
+          const galleryTop = scrollY + galleryRect.top;
+          const galleryHeight = gallerySection.offsetHeight;
+          
+          // Calculate scroll progress through gallery (0 to 1)
+          const scrollProgress = Math.max(0, Math.min(1, (scrollY - galleryTop) / (galleryHeight - windowHeight)));
+          
+          // Show title when we enter the gallery
+          if (scrollProgress > 0.05) {
+            galleryTitle.classList.add('visible');
+          } else {
+            galleryTitle.classList.remove('visible');
+          }
+          
+          // Animate items based on scroll progress
+          // Each item takes 0.15 of the total scroll range, with 0.05 spacing
+          const itemAnimationRange = 0.15;
+          const itemSpacing = 0.05;
+          
+          items.forEach((item, index) => {
+            // Calculate when this item should start and end animating
+            const startProgress = 0.1 + (index * (itemAnimationRange + itemSpacing));
+            const endProgress = startProgress + itemAnimationRange;
+            
+            // Calculate animation progress for this specific item (0 to 1)
+            const itemProgress = Math.max(0, Math.min(1, (scrollProgress - startProgress) / itemAnimationRange));
+            
+            // Calculate exit animation (items move up together at the end)
+            const exitStartProgress = 0.85;
+            const exitProgress = Math.max(0, Math.min(1, (scrollProgress - exitStartProgress) / 0.15));
+            
+            if (exitProgress > 0) {
+              // Exit animation - all items move up together
+              const exitY = -exitProgress * window.innerHeight;
+              const exitOpacity = 1 - exitProgress;
+              
+              item.element.style.transform = `translateY(${exitY}px)`;
+              item.element.style.opacity = exitOpacity;
+              item.label.style.transform = `translateY(${exitY}px)`;
+              item.label.style.opacity = exitOpacity;
+            } else if (itemProgress > 0) {
+              // Entry animation - smooth slide up from bottom
+              const startY = window.innerHeight;
+              const currentY = startY * (1 - itemProgress);
+              const opacity = Math.min(1, itemProgress * 2); // Fade in faster
+              
+              item.element.style.transform = `translateY(${currentY}px)`;
+              item.element.style.opacity = opacity;
+              
+              // Label appears slightly after the card
+              const labelProgress = Math.max(0, (itemProgress - 0.3) / 0.7);
+              item.label.style.transform = `translateY(${20 * (1 - labelProgress)}px)`;
+              item.label.style.opacity = labelProgress;
+            } else {
+              // Before animation starts
+              item.element.style.transform = `translateY(${window.innerHeight}px)`;
+              item.element.style.opacity = '0';
+              item.label.style.transform = 'translateY(20px)';
+              item.label.style.opacity = '0';
+            }
+          });
+        }
+
+        // Beverly Hills floating text and overlay fade out on scroll
+        function updateBeverlyHillsEffects() {
+          const scrollY = window.scrollY;
+          const windowHeight = window.innerHeight;
+          const floatingText = document.getElementById('floating-text');
+          const overlay = document.getElementById('beverly-hills-overlay');
+          const magnifier = document.getElementById('beverly-hills-magnifier');
+          
+          // Fade out the floating text as we scroll past 60% of the Beverly Hills section
+          const fadeThreshold = windowHeight * 0.6;
+          
+          if (scrollY > fadeThreshold) {
+            const fadeProgress = Math.min((scrollY - fadeThreshold) / (windowHeight * 0.4), 1);
+            
+            // Fade out text
+            floatingText.style.opacity = 1 - fadeProgress;
+            floatingText.style.transform = `translateY(-${fadeProgress * 50}px)`;
+            
+            // Fade out overlay and show magnifier
+            if (fadeProgress > 0.5) {
+              overlay.classList.add('fade-overlay');
+              magnifier.classList.add('visible');
+            } else {
+              overlay.classList.remove('fade-overlay');
+              magnifier.classList.remove('visible');
+            }
+          } else {
+            floatingText.style.opacity = 1;
+            floatingText.style.transform = 'translateY(0)';
+            overlay.classList.remove('fade-overlay');
+            magnifier.classList.remove('visible');
+          }
+        }
+
+        // Combined scroll handler
+        function handleScroll() {
+          updateBeverlyHillsEffects();
+          updateGalleryAnimations();
+        }
+
+        // Throttled scroll handler for better performance
+        let ticking = false;
+        function throttledScrollHandler() {
+          if (!ticking) {
+            requestAnimationFrame(function() {
+              handleScroll();
+              ticking = false;
+            });
+            ticking = true;
+          }
+        }
+
+        window.addEventListener('scroll', throttledScrollHandler);
+
+        // Initial setup
+        handleScroll();
+
+        // Click functionality for Beverly Hills background
+        document.getElementById('beverly-hills-bg').addEventListener('click', function() {
+          window.open('data/Beverly_Hills_description_wordcloud.png', '_blank');
+        });
+
+        // Click functionality for wordcloud cards
+        const wordcloudCards = document.querySelectorAll('.wordcloud-card');
+        
+        wordcloudCards.forEach(card => {
+          card.addEventListener('click', function() {
+            const neighborhood = this.getAttribute('data-neighborhood');
+            const imageUrl = `data/${neighborhood}_description_wordcloud.png`;
+            
+            // Open in new tab
+            window.open(imageUrl, '_blank');
+          });
+        });
+
+        // Resize handler
+        window.addEventListener('resize', handleScroll);
+      });
+    </script>
+  </body>
+</html>
