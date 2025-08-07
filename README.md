@@ -1,4 +1,4 @@
-# Zillow Rental Word Cloud Analysis
+# Zillow Rental Word Cloud Analyzer
 
 This project scrapes Zillow rental listings from different Los Angeles neighborhoods and creates word clouds to analyze the descriptive language used in each area. The goal WAS to compare socioeconomic differences across neighborhoods through the language used in rental listings. That didn't go so well, mostly because Playwright scrapers are HARD.
 
