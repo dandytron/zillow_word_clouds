@@ -26,6 +26,27 @@
         margin: 0 auto;
       }
 
+      /* Byline */
+      .byline {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.9rem;
+        color: #64748b;
+        text-align: center;
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .byline a {
+        color: #3b82f6;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      .byline a:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+      }
+
       .header h1 {
         font-size: clamp(2rem, 5vw, 3.5rem);
         font-weight: 300;
@@ -38,7 +59,8 @@
         font-size: clamp(1rem, 2.5vw, 1.25rem);
         color: #64748b;
         max-width: 800px;
-        margin: 0 auto;
+        margin: 0 auto 1.5rem auto;
+        text-align: left;
       }
 
       /* Beverly Hills Scrollytelling Section */
@@ -305,6 +327,7 @@
         color: #475569;
         margin-bottom: 1.5rem;
         line-height: 1.7;
+        text-align: left;
       }
 
       /* Mobile Responsive */
@@ -362,8 +385,9 @@
     <!-- Header Section -->
     <header class="header">
       <h1>Los Angeles Neighborhood Word Clouds</h1>
+      <div class="byline">By <a href="https://github.com/dandytron" target="_blank">Ryan Brooks</a></div>
       <p>
-        As I mentioned in a previous project, I’m moving to Los Angeles. Like, in less than two months! It’s very close and I feel like I don’t really *get* the city or its neighborhoods but I'm expected to figure out where's good real fast.
+        As I mentioned in a previous project, I'm moving to Los Angeles. Like, in less than two months! It's very close and I feel like I don't really *get* the city or its neighborhoods but I'm expected to figure out where's good real fast.
       </p>
       <p>  
         You see, all of my adult life, I have lived in big Asia mega-metropolises that are arranged around efficient train lines: Seoul, Osaka, Hong Kong. Even the American cities I am most familiar with have functional train systems: Washington, New York.
