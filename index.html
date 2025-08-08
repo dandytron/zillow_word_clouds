@@ -596,15 +596,59 @@
           const overlay = document.getElementById('beverly-hills-overlay');
           const magnifier = document.getElementById('beverly-hills-magnifier');
           
-          // Fade out the floating text as we scroll past 60% of the Beverly Hills section
-          const fadeThreshold = windowHeight * 0.6;
+          // Get Beverly Hills section position and dimensions
+          const beverlyHillsSection = document.querySelector('.beverly-hills-section');
+          const sectionRect = beverlyHillsSection.getBoundingClientRect();
+          const sectionTop = scrollY + sectionRect.top;
+          const sectionHeight = beverlyHillsSection.offsetHeight; // This is 200vh
+          
+          // Start fading when we're 80% through the Beverly Hills section
+          const fadeThreshold = sectionTop + (sectionHeight * 0.8);
+          
+          // Calculate scroll progress through the entire section
+          const scrollProgress = Math.max(0, Math.min(1, (scrollY - sectionTop) / sectionHeight));
+          
+          // Entrance animation: slide up into view
+          let entranceOffset = 0;
+          let opacity = 1;
+          
+          if (scrollProgress < 0.15) {
+            // Slide up from below during first 15% of section
+            const entranceProgress = scrollProgress / 0.15; // 0-1 over first 15%
+            entranceOffset = (1 - entranceProgress) * 100; // Start 100px below, slide to 0
+            opacity = entranceProgress; // Fade in as it slides up
+          }
+          
+          // Parallax and zip effect after entrance
+          let parallaxOffset = 0;
+          if (scrollProgress >= 0.15) {
+            // Adjust progress for parallax phase (15%-100% becomes 0%-100%)
+            const adjustedProgress = (scrollProgress - 0.15) / 0.85;
+            
+            if (adjustedProgress < 0.6) {
+              // Gentle parallax for first 60% of remaining section
+              parallaxOffset = adjustedProgress * 30; // Slow movement: 0-18px
+            } else {
+              // Accelerating "zip up" effect for remaining 40%
+              const zipProgress = (adjustedProgress - 0.6) / 0.4; // 0-1 over the last 40%
+              const baseOffset = 0.6 * 30; // 18px from gentle phase
+              const zipOffset = zipProgress * zipProgress * 200; // Quadratic acceleration: 0-200px
+              parallaxOffset = baseOffset + zipOffset;
+            }
+          }
+          
+          // Combine entrance and parallax offsets
+          const totalOffset = entranceOffset + parallaxOffset;
           
           if (scrollY > fadeThreshold) {
-            const fadeProgress = Math.min((scrollY - fadeThreshold) / (windowHeight * 0.4), 1);
+            // Calculate fade progress over the remaining 20% of the section
+            const fadeDistance = sectionHeight * 0.2;
+            const fadeProgress = Math.min((scrollY - fadeThreshold) / fadeDistance, 1);
             
-            // Fade out text
-            floatingText.style.opacity = 1 - fadeProgress;
-            floatingText.style.transform = `translateY(-${fadeProgress * 50}px)`;
+            // Combine entrance, parallax, and fade effects
+            const finalOpacity = opacity * (1 - fadeProgress);
+            floatingText.style.opacity = finalOpacity;
+            floatingText.style.transform = `translateY(-${totalOffset}px)`;
             
             // Fade out overlay and show magnifier
             if (fadeProgress > 0.5) {
@@ -615,8 +659,9 @@
               magnifier.classList.remove('visible');
             }
           } else {
-            floatingText.style.opacity = 1;
-            floatingText.style.transform = 'translateY(0)';
+            // Entrance and parallax effects only
+            floatingText.style.opacity = opacity;
+            floatingText.style.transform = `translateY(-${totalOffset}px)`;
             overlay.classList.remove('fade-overlay');
             magnifier.classList.remove('visible');
           }
